@@ -78,11 +78,11 @@ USER_AGENT_LIST = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15'
 ]
-DEFAULT_OLDNESS_SECONDS = 1000
+DEFAULT_OLDNESS_SECONDS = 240
 DEFAULT_MAXIMUM_ITEMS = 25
 DEFAULT_MIN_POST_LENGTH = 10
 
-RANDOM_SKIP_TOPIC_PROBABILITY = 0.15
+RANDOM_SKIP_TOPIC_PROBABILITY = 0.20
 
 TIMESTAMP_PATTERN = r'^\d{2}:\d{2}:\d{2}$'
 
