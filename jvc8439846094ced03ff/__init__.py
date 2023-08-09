@@ -156,8 +156,8 @@ async def request_last_page(_url, _max_age, _post_title, _bypass=False):
 
                 data_id = card["data-id"]
                 # url = "https://www.jeuxvideo.com/forums/message/" + data_id
-                url = _url + "?exorde-internal-id:" + data_id  # optional parameter to find the comment later
-
+                # old internal URL: url = _url + "?exorde-internal-id:" + data_id  # optional parameter to find the comment later
+                url = _url + "#post_" + data_id # REAL URL
                 # Some posts will be responding to others
                 post_content = card.findChild("div", {"class": "txt-msg text-enrichi-forum"})
                 contents = post_content.findChildren("p", recursive=False)
