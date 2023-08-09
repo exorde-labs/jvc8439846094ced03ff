@@ -65,6 +65,7 @@ from exorde_data import (
     Title,
     Url,
     Domain,
+    ExternalId
 )
 
 # GLOBAL VARIABLES
@@ -170,7 +171,12 @@ async def request_last_page(_url, _max_age, _post_title, _bypass=False):
                     content=Content(content),
                     created_at=CreatedAt(post_date),
                     url=Url(url),
-                    domain=Domain("jeuxvideo.com"))
+                    domain=Domain("jeuxvideo.com"),
+                    external_id=ExternalId(str(data_id))
+                )
+                # verify if there are any comments to this post
+                # if there are, we need to get them too
+
 
     except Exception as e:
         logging.exception("Error:" + str(e))
