@@ -88,14 +88,29 @@ RANDOM_SKIP_TOPIC_PROBABILITY = 0.20
 TIMESTAMP_PATTERN = r'^\d{2}:\d{2}:\d{2}$'
 
 JVc_URLS = [
+    "https://www.jeuxvideo.com/forums/0-50-0-1-0-1-0-blabla-15-18-ans.htm",
+    "https://www.jeuxvideo.com/forums/0-51-0-1-0-1-0-blabla-18-25-ans.htm",
+    "https://www.jeuxvideo.com/forums/0-52-0-1-0-1-0-blabla-25-35-ans.htm",
     "https://www.jeuxvideo.com/forums/0-51-0-1-0-1-0-blabla-18-25-ans.htm",
     "https://www.jeuxvideo.com/forums/0-52-0-1-0-1-0-blabla-25-35-ans.htm",
     "https://www.jeuxvideo.com/forums/0-53-0-1-0-1-0-blabla-35-ans-et-plus.htm",
+    "https://www.jeuxvideo.com/forums/0-65-0-1-0-1-0-sciences-technologies.htm",
+    "https://www.jeuxvideo.com/forums/0-3000476-0-1-0-1-0-art.htm",
+    "https://www.jeuxvideo.com/forums/0-1-0-1-0-1-0-informatique.htm",
     "https://www.jeuxvideo.com/forums/0-1000034-0-1-0-1-0-japon.htm",
     "https://www.jeuxvideo.com/forums/0-83-0-1-0-1-0-quebec.htm",
     "https://www.jeuxvideo.com/forums/0-1000022-0-1-0-1-0-suisse.htm",
     "https://www.jeuxvideo.com/forums/0-1000020-0-1-0-1-0-belgique.htm",
     "https://www.jeuxvideo.com/forums/0-3011927-0-1-0-1-0-finance.htm",
+    "https://www.jeuxvideo.com/forums/0-69-0-1-0-1-0-actualites.htm",
+    "https://www.jeuxvideo.com/forums/0-3011927-0-1-0-1-0-finance.htm",
+    "https://www.jeuxvideo.com/forums/0-69-0-1-0-1-0-actualites.htm",
+    "https://www.jeuxvideo.com/forums/0-3011927-0-1-0-1-0-finance.htm",
+    "https://www.jeuxvideo.com/forums/0-7-0-1-0-1-0-general-jeux-video.htm",
+    "https://www.jeuxvideo.com/forums/0-1000049-0-1-0-1-0-salons-et-evenements.htm",
+    "https://www.jeuxvideo.com/forums/0-3000472-0-1-0-1-0-jeux-independants.htm",
+    "https://www.jeuxvideo.com/forums/0-4-0-1-0-1-0-jeu-en-ligne.htm",
+    "https://www.jeuxvideo.com/forums/0-3-0-1-0-1-0-petites-annonces.htm",
     "https://www.jeuxvideo.com/forums/0-69-0-1-0-1-0-actualites.htm",
     "https://www.jeuxvideo.com/forums/0-3002340-0-1-0-1-0-sante-et-bien-etre.htm",
     "https://www.jeuxvideo.com/forums/0-3000405-0-1-0-1-0-creation.htm",
@@ -368,15 +383,16 @@ def read_parameters(parameters):
 
 
 async def query(parameters: dict) -> AsyncGenerator[Item, None]:
-    url_main_endpoint = random.choice(JVc_URLS)  # choose a URL in the given list at random
-    yielded_items = 0
-    max_oldness_seconds, maximum_items_to_collect, min_post_length = read_parameters(parameters)
-    logging.info(f"[JeuxVideo.com] - Scraping messages posted less than {max_oldness_seconds} seconds ago.")
+    for _ in range(0, 3):
+        url_main_endpoint = random.choice(JVc_URLS)  # choose a URL in the given list at random
+        yielded_items = 0
+        max_oldness_seconds, maximum_items_to_collect, min_post_length = read_parameters(parameters)
+        logging.info(f"[JeuxVideo.com] - Scraping messages posted less than {max_oldness_seconds} seconds ago.")
 
-    async for item in request_entries_with_timeout(url_main_endpoint, max_oldness_seconds):
-        logging.info("reading item")
-        yielded_items += 1
-        yield item
-        logging.info(f"[JeuxVideo.com] Found new post :\t {item.title}, posted at {item.created_at}, URL = {item.url}")
-        if yielded_items >= maximum_items_to_collect:
-            break
+        async for item in request_entries_with_timeout(url_main_endpoint, max_oldness_seconds):
+            logging.info("reading item")
+            yielded_items += 1
+            yield item
+            logging.info(f"[JeuxVideo.com] Found new post :\t {item.title}, posted at {item.created_at}, URL = {item.url}")
+            if yielded_items >= maximum_items_to_collect:
+                break
