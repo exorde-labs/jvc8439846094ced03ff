@@ -259,10 +259,6 @@ async def request_entries_with_timeout(_url, _max_age):
                             entries.append(entry)
                         else:
                             logging.info("Skipped due to random skip probability")
-                    else:
-                        logging.info(f"skipped because item is too old ({entry.text.strip()}, max_age = {_max_age}), delay = {delay}")
-                else:
-                    logging.info(f"Skipped due to timestamp {entry.text.strip()}")
             async for item in parse_entry_for_elements(entries, _max_age):
                 yield item
     except Exception as e:
@@ -286,8 +282,13 @@ def convert_date_and_time_to_date_format(_date):
     # Combine the date and time strings
     datetime_str = f"{date_string} {time_part}"
     # Parse the combined string into a datetime object
-    input_time = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S") - timedelta(hours=1)  # convert to UTC + 0
+    french_input_time = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S")
     # Convert to UTC+0 (UTC) and format to the desired string format
+    # Assume the French time as Europe/Paris timezone
+    paris_zone = pytz.timezone('Europe/Paris')
+    french_input_time = paris_zone.localize(french_input_time)
+    # Convert to UTC+0 (UTC) and format to the desired string format
+    input_time = french_input_time.astimezone(pytz.utc)
     formatted_time = input_time.strftime("%Y-%m-%dT%H:%M:%S.00Z")
     return formatted_time
 
