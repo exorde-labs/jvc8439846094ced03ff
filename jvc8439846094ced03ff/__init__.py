@@ -286,7 +286,7 @@ def convert_date_and_time_to_date_format(_date):
     # Combine the date and time strings
     datetime_str = f"{date_string} {time_part}"
     # Parse the combined string into a datetime object
-    input_time = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S") - timedelta(hours=2)  # convert to UTC + 0
+    input_time = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S") - timedelta(hours=1)  # convert to UTC + 0
     # Convert to UTC+0 (UTC) and format to the desired string format
     formatted_time = input_time.strftime("%Y-%m-%dT%H:%M:%S.00Z")
     return formatted_time
