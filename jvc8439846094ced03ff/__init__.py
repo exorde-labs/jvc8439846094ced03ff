@@ -148,6 +148,7 @@ async def request_last_page(_url, _max_age, _post_title, _bypass=False):
                 <div class="bloc-date-msg"/>.text for the date of the post under this format: "Day Month YYYY [à] HH:MM:SS"
             """
             cards = soup.find_all("div", {"class": "bloc-message-forum mx-2 mx-lg-0"})  # search it backwards, start by the latest
+            logging.info(f"found {len(cards)} cards")
             for card in reversed(cards):
                 date_of_post = card.findChild("div", {"class": "bloc-date-msg"}).text.strip()  # Date needs to be converted
                 post_date = convert_date_and_time_to_date_format(date_of_post)
@@ -234,11 +235,19 @@ async def request_entries_with_timeout(_url, _max_age):
             soup = BeautifulSoup(response, 'html.parser')
             unfiltered_entries = soup.find_all("span", {"class": "topic-date"})
             entries = []
+            logging.info(f"Found {len(unfiltered_entries)} unfiltered entries")
             for entry in unfiltered_entries:
                 if re.match(TIMESTAMP_PATTERN, entry.text.strip()):  # now check that it respects our time window
-                    if check_for_max_age(entry.text.strip(), _max_age):
+                    is_fresh, delay = check_for_max_age(entry.text.strip(), _max_age)
+                    if is_fresh:
                         if random.uniform(0, 1) >= RANDOM_SKIP_TOPIC_PROBABILITY:  # random chance to skip the topic
                             entries.append(entry)
+                        else:
+                            logging.info("Skipped due to random skip probability")
+                    else:
+                        logging.info(f"skipped because item is too old ({entry.text.strip()}, max_age = {_max_age}), delay = {delay}")
+                else:
+                    logging.info(f"Skipped due to timestamp {entry.text.strip()}")
             async for item in parse_entry_for_elements(entries, _max_age):
                 yield item
     except Exception as e:
@@ -299,15 +308,15 @@ def check_for_max_age(_date, _max_age):
     today_date = datetime.now().date()
     # Combine today's date and the provided timestamp
     combined_str = f"{today_date}T{_date}"
-    date_to_check = datetime.strptime(combined_str, "%Y-%m-%dT%H:%M:%S") - timedelta(
-        hours=2)  # convert from UTC + 1 to UTC + 0
+    date_to_check = datetime.strptime(combined_str, "%Y-%m-%dT%H:%M:%S")
     now_time = datetime.strptime(datetime.strftime(datetime.now(pytz.utc), "%Y-%m-%dT%H:%M:%S.00Z"),
                                  "%Y-%m-%dT%H:%M:%S.00Z")
 
-    if (now_time - date_to_check).total_seconds() <= _max_age:
-        return True
+    result = (now_time - date_to_check).total_seconds()
+    if result <= _max_age:
+        return (True, result)
     else:
-        return False
+        return (False, result)
 
 
 async def parse_entry_for_elements(_cards, _max_age):
@@ -326,8 +335,7 @@ async def parse_entry_for_elements(_cards, _max_age):
             async for item in request_content_with_timeout("https://www.jeuxvideo.com" + parent["href"], _max_age, post_title):
                 if item:
                     yield item
-                else:
-                    break  # if this item was not in the time bracket that interests us, the following ones will not be either
+
     except Exception as e:
         logging.exception("Error:" + str(e))
 
@@ -366,6 +374,7 @@ async def query(parameters: dict) -> AsyncGenerator[Item, None]:
     logging.info(f"[JeuxVideo.com] - Scraping messages posted less than {max_oldness_seconds} seconds ago.")
 
     async for item in request_entries_with_timeout(url_main_endpoint, max_oldness_seconds):
+        logging.info("reading item")
         yielded_items += 1
         yield item
         logging.info(f"[JeuxVideo.com] Found new post :\t {item.title}, posted at {item.created_at}, URL = {item.url}")
